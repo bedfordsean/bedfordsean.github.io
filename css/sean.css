@@ -1,0 +1,15 @@
+div .iphone {
+		background-image: url(../images/iphone.png);
+		height: 800px;
+		width: 380px;
+		margin-left: auto;
+		margin-right: auto;
+		margin-top : -50px;
+		padding-top: 120px;
+}
+
+div .emphtext {
+	font-weight: bold;
+	font-size: 1.5em;
+	margin-top: 150px;
+}
