@@ -4,9 +4,9 @@
 	<head>
 		<meta charset="utf-8">
 
-		<title>PSC Presentation</title>
+		<title>Lessons Learnt implementing a Worklight-based eCommerce mobile solution</title>
 
-		<meta name="description" content="A presentation made for the PSC training course">
+		<meta name="description" content="A presentation made for the WebSphere User Group talks in March 2014">
 		<meta name="author" content="Sean Bedford">
 
 		<meta name="apple-mobile-web-app-capable" content="yes" />
@@ -43,90 +43,45 @@
 			<!-- Any section element inside of this container is displayed as a slide -->
 			<div class="slides">
 				<section>
-					<h1>PSC Presentation</h1>
+					<h1>Lessons Learnt implementing a Worklight-based eCommerce mobile solution</h1>
 					<p>
 						<small><a href="http://seanbedford.com">Sean Bedford</a> / <a href="http://twitter.com/bedfordsean">@bedfordsean</a> / <a href="mailto:SEANBEDFORD@uk.ibm.com">SEANBEDFORD@uk.ibm.com</a></small>
 					</p>
 				</section>
 				<section>
-					<h2>Past 18 months</h2>
-					<ul>
-						<li>Started as a GBS Mobile Asset</li>
-						<li>Moved on to Waitrose PoC using Worklight</li>
-						<li>Demoed to customer and won the bid</li>
-						<li>Started as Worklight lead</li>
-						<li>Progressed to dev team lead and now lead architect</li>
-					</ul>
+					<h2>What is Worklight?</h2>
+					<!-- Worklight diagram, how it fits in with WAS (ND or Liberty) -->
 				</section>
 
 				<section>
 					<h2>Product Overview</h2>
-					<img src="../images/WLOverview.png"/>
+					<!-- Continuation, possibly Jon Marshall's "product slide"; cover back end connectivity and security model features? -->
 				</section>
 
 				<section>
-					<h2>Waitrose Mobile site and App</h2>
-					<ul>
-						<li>Production release 1.0 ran from January - September 2013</li>
-						<li>Release 2.0 (Jan 2014) and 3.0 (Feb 2014) contained improvements and iOS/Android app releases</li>
-					</ul>
-					<div class="emphtext fragment">Up next... Live demo!</div>
-				</section>
-
-				<section data-transition="zoom">
-					<div class="iphone">
-						<iframe src="https://m.waitrose.com" style="width: 316px; height : 570px"></iframe>
-					</div>
+					<h2>Good Design patterns when working with Worklight Client Applications</h2>
+					<!-- Overview of a few things we've learnt. In more detail in next slides -->
 				</section>
 
 				<section>
-					<h2>Technical Skills</h2>
-					<ul>
-						<li>IBM Worklight</li>
-						<li>WebSphere Commerce</li>
-						<li>Dojo</li>
-						<li>CSS3</li>
-						<li>HTML5</li>
-						<li>PhoneGap</li>
-						<li>Defining Software Architectures</li>
-					</ul>
+					<h2>Laying out client side code following MVC</h2>
+					<!-- Cover store/template/stateful-esque behaviour (not Dojo specific) -->
+				</section>
+				
+				<section>
+					<h2>UX/UI Best Practice</h2>
+					<!-- Common design patterns (lists, tables, modals), customer flows, etc -->
 				</section>
 
 				<section>
-					<h2>Soft Skills</h2>
-					<ul>
-						<li>Team leadership experience</li>
-						<li>Handling customer expectations</li>
-						<li>Working with global delivery</li>
-						<li>Understanding the software lifecycle end-end</li>
-						<li>Establishing a network both inside and outside of IBM</li>
-					</ul>
+					<h2>Consistent management of back end service requests</h2>
+					<!-- Cover single entry/exit point function in client and adapter for each back end -->
 				</section>
 
 				<section>
-					<h2>IBM Competencies</h2>
-					<ul>
-						<li>Submitted Foundation level capability (Actualizing IT Solutions)</li>
-						<li>Completed Entry level capability (Actualizing IT Solutions)</li>
-						<li>Submitted four competencies at Foundation level</li>
-						<li>Completed four competencies at Entry level</li>
-					</ul>
+					<h2>Basic Worklight user authentication</h2>
+					<!-- Cover the basics of back-end cookie based authentication -->
 				</section>
-
-				<section>
-					<h2>Acting as a GBS Mobile SME</h2>
-					<ul>
-						<li><a href="http://ibm.co/1ehYGBK">Published</a> and <a href="http://ibm.co/LnPpeK">contributed to</a> DeveloperWorks articles</li> 
-						<li>Speaking on MobileFirst sales calls about Waitrose</li>
-						<li>Collaborating with GBS mobile team at Homebase</li>
-						<li>Collaborating on two giveback projects to help build mobile applications</li>
-						<li>Speaking at <a href="http://www.websphereusergroup.co.uk/wug/">WebSphere User Group</a> about IBM production mobile projects</li>
-						<li>Building assets for use across SWG Services, IBM Interactive Labs, and other GBS projects</li>
-						<li>Helping to build a team of GBS MobileFirst "doers"</li>
-					</ul>
-				</section>
-
-
 
 				<section>
 					<h1>Questions?</h1>
