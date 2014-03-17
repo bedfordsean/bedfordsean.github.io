@@ -18,9 +18,11 @@
 		<link rel="stylesheet" href="css/theme/default.css" id="theme">
 
 		<!-- For syntax highlighting -->
+
+		<link rel="stylesheet" href="css/sean.css">
 		<link rel="stylesheet" href="lib/css/zenburn.css">
 
-		<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+		<!-- <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css"> -->
 
 		<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
 
@@ -28,8 +30,6 @@
 		<script>
 			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
 		</script>
-
-		<link rel="stylesheet" href="css/sean.css">
 
 		<!--[if lt IE 9]>
 		<script src="lib/js/html5shiv.js"></script>
@@ -43,44 +43,184 @@
 			<!-- Any section element inside of this container is displayed as a slide -->
 			<div class="slides">
 				<section>
-					<h1>Lessons Learnt implementing a Worklight-based eCommerce mobile solution</h1>
+					<h2>Lessons Learnt implementing a Worklight-based eCommerce mobile solution</h2>
 					<p>
 						<small><a href="http://seanbedford.com">Sean Bedford</a> / <a href="http://twitter.com/bedfordsean">@bedfordsean</a> / <a href="mailto:SEANBEDFORD@uk.ibm.com">SEANBEDFORD@uk.ibm.com</a></small>
 					</p>
 				</section>
 				<section>
-					<h2>What is Worklight?</h2>
-					<!-- Worklight diagram, how it fits in with WAS (ND or Liberty) -->
+					<section>
+						<h2>What is Worklight? - Server side</h2>
+				        <!-- Worklight diagram, how it fits in with WAS (ND or Liberty) -->
+						<img src="images/WLOverview.svg" style="height:600px"/>
+						<aside class="notes">
+						<ul>
+							<li>Sits inside a WAS/J2EE container</li>
+							<li>Connects to a variety of back end services</li>
+							<li>Geared up specifically to serve mobile devices</li>
+							<li>Contains more "plumbing" than just Cordova, although it does include Cordova</li>
+						</ul>
+					</aside>
+				    </section>
+
+				    <section>
+				    	<h2>What is Worklight? - Client side</h2>
+				        <!-- Worklight diagram, how it fits in with WAS (ND or Liberty) -->
+						<img src="images/WLClientOverview.svg" style="height:600px"/>
+				    </section>
+
+					
+					
 				</section>
 
 				<section>
-					<h2>Product Overview</h2>
+					<h2>The Bigger Picture</h2>
 					<!-- Continuation, possibly Jon Marshall's "product slide"; cover back end connectivity and security model features? -->
+					<img src="images/WLProductOverview.jpg"/>
+
+					<aside class="notes">
+						<ul>
+							<li>Easy to do authentication</li>
+							<li>Mashups easy in WL adapters</li>
+							<li>Direct "Hybrid" updates to devices possible</li>
+							<li>Mobile specific analytics "for free"</li>
+						</ul>
+					</aside>
 				</section>
 
 				<section>
-					<h2>Good Design patterns when working with Worklight Client Applications</h2>
-					<!-- Overview of a few things we've learnt. In more detail in next slides -->
+					<section>
+						<h2>Why is it good?</h2>
+						<ul>
+							<li>Out-of-box support for app analytics (Device, OS, code version)</li>
+							<li>Direct update provides a powerful way to quickly patch issues</li>
+							<li>App versioning scheme allows operational management of multiple deployed versions</li>
+							<li>Security model provides easy control of back end resources</li>
+							<li>Not "just Cordova (PhoneGap)" - native APIs for iOS, Android, and devices running JavaME</li>
+						</ul>
+					</section>
+					<section>
+						<h2>Cordova Primer</h2>
+						<ul>
+							<li>API layer between web container and native functionality</li>
+							<li>You can write a new Cordova plugin with native implementations on each platform you want to support</li>
+							<li>This plugin can then be wrapped in to JavaScript to allow for calling from a web container</li>
+						</ul>
+					</section>
 				</section>
 
 				<section>
-					<h2>Laying out client side code following MVC</h2>
-					<!-- Cover store/template/stateful-esque behaviour (not Dojo specific) -->
+					<h2>Client side code</h2>
+					<h4>MVC approach</h4>
+					<p>
+						<ul>
+							<li>How do you store data?</li>
+							<li>How do you display data?</li>
+							<li>How do you handle the business rules?</li>
+						</ul>
+					</p>
+					<p class="fragment fade-in">
+						Pick a framework that supports MVC. It will make your life MUCH easier :-)
+					</p>
+
+					<aside class="notes">
+						<ul>
+							<li>MVC approach</li>
+							<li>Best to pick a framework that supports this flow</li>
+							<li>Stateful views that automatically update based on data = good</li>
+							<li>E.g. jQuery Mobile, AngularJS, Ionic, Dojo, etc</li>
+						</ul>
+					</aside>
+				</section>					
+				<section>					
+					<h2>Think of the user</h2>
+					<ul>
+						<li>Think about how the user is going to interact with your app</li>
+						<li>Consider control and text sizes. Apple recommends >= 44px * 44px tappable area</li>
+						<li>Design, prototype, and test with actual end-users</li>
+						<li>Don't be afraid to scrap a design and start again</li>
+					</ul>
+					<aside class="notes">
+						<ul>
+							<li>Prototyping VERY important in early project stages</li>
+							<li>Demo early and often to the business stakeholders. UI+UX is very subjective</li>
+							<li>Read Apple Human Interface Guidelines (https://developer.apple.com/library/ios/documentation/userexperience/conceptual/MobileHIG/index.html)</li>
+						</ul>
+					</aside>
 				</section>
-				
 				<section>
-					<h2>UX/UI Best Practice</h2>
+					<h2>Common UI Patterns</h2>
 					<!-- Common design patterns (lists, tables, modals), customer flows, etc -->
+					<img src="images/CommonUI.png" style="border:none; background:none; box-shadow:none; max-width: 120%; margin-left: -100px"/>
+					<aside class="notes">
+						<ul>
+							<li>Think about common mobile patterns. Ok to have something custom, but remember that these platforms have established paradigms already!</li>
+							<li>Chevrons to indicate a view to transition to, coloured links that can be tapped, button areas, etc</li>
+							<li>Lists, Modals, tables, all common</li>
+							<li>Best to also pick a framework that allows you to do all of these, or most of them, to save on custom work</li>
+						</ul>
+					</aside>
 				</section>
 
 				<section>
-					<h2>Consistent management of back end service requests</h2>
+					<h2>Server side code</h2>
 					<!-- Cover single entry/exit point function in client and adapter for each back end -->
-				</section>
+					<h4>Consistent endpoint management</h4>
+					<ul>
+						<li>Common problem: How to handle errors, timeouts, bad responses consistently?</li>
+						<li class="fragment fade-in">Solution: Provide a consistent client- and server-side endpoint<img src="images/WrapperMethod.svg"/></li>
+					</ul>
 
+					<aside class="notes">
+						Allows for control point to intercept (amongst other things)
+
+						<ul>
+							<li>User session timeout</li>
+							<li>Back end server error (404, 500)</li>
+							<li>Back end server returning something other than JSON</li>
+							<li>Back end server redirect</li>
+							<li>User error/info messaging</li>
+						</ul>
+					</aside>
+				</section>
 				<section>
-					<h2>Basic Worklight user authentication</h2>
-					<!-- Cover the basics of back-end cookie based authentication -->
+					<!-- Cover the basics of back-end cookie based authentication -->				
+					<h2>Basic Worklight user authentication</h2>	
+					<ul>
+						<li>A key feature of Worklight is it's security model</li>
+						<li>This allows the securing of a back end call with a single line of code (once it is set up)</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Example</h2>
+					<ul>
+						<li>In your adapter's XML file, add a security test to a function</li>
+					</ul>
+					<pre><code data-trim style="width:110%">
+<procedure name="myUnsecuredProcedure"></procedure>
+<procedure name="mySecuredProcedure" securityTest="MySecurityTest"></procedure>
+					</code></pre>
+
+					<ul>
+							<li>This will trigger a security test for a realm you've defined in authenticationConfig.xml</li>
+					</ul>
+					<pre><code data-trim style="width:110%">
+<customSecurityTest name="MySecurityTest">
+<test isInternalUserID="true" realm="MySecureRealm" step="1" />
+</customSecurityTest>
+					</code></pre>
+					<ul>
+						<li>This in turn will issue a challenge for "MySecureRealm" if there is no user logged in for that realm</li>
+						<li>At this point, your client code can handle the challenge, by providing authentication details, tokens etc</li>
+					</ul>
+					<aside class="notes">
+						<ul>
+							<li>Client req > WL Server security check > Issue Challenge > Provide auth details > WL Server verify > Re-issue orig request</li>
+							<li>Will issue challenge on first request to secured procedure</li>
+							<li>Request can then be made again after auth</li>
+							<li>WL server can store details of the user session, or you can handle this yourself</li>
+						</ul>
+					</aside>
 				</section>
 
 				<section>
