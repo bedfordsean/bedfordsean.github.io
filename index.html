@@ -151,7 +151,7 @@
 					<aside class="notes">
 						<ul>
 							<li>Think about common mobile patterns. Ok to have something custom, but remember that these platforms have established paradigms already!</li>
-							<li>Chevrons to indicate a view to transition to, coloured links that can be tapped, button areas, etc</li>
+							<li>Chevrons to indicate a view to transition to, coloured links that can be tapped, tabble area size, informational prompts</li>
 							<li>Lists, Modals, tables, all common</li>
 							<li>Best to also pick a framework that allows you to do all of these, or most of them, to save on custom work</li>
 						</ul>
@@ -178,6 +178,15 @@
 							<li>User error/info messaging</li>
 						</ul>
 					</aside>
+				</section>
+
+				<section>
+					<h2>Performance, Security, Scalability Considerations</h2>
+					<ul>
+						<li>Think about end-end versioning - does your back end support multiple live versions?</li>
+						<li>Think about security - validation in the front end only is never enough</li>
+						<li>Think about how the application will load and service frequent requests (startup, browse, login...)</li>
+					</ul>
 				</section>
 				<section>
 					<!-- Cover the basics of back-end cookie based authentication -->				
@@ -207,7 +216,7 @@
 					</code></pre>
 					<ul>
 						<li>This in turn will issue a challenge for "MySecureRealm" if there is no user logged in for that realm</li>
-						<li>At this point, your client code can handle the challenge, by providing authentication details, tokens etc</li>
+						<li>At this point, your client code can handle the challenge, by providing authentication details, tokens, or similar</li>
 					</ul>
 					<aside class="notes">
 						<ul>
