@@ -113,7 +113,7 @@
 						</ul>
 					</p>
 					<p class="fragment fade-in">
-						Pick a framework that supports MVC. It will make your life MUCH easier :-)
+						Pick a framework that supports MVC such as <strong>jQuery Mobile, AngularJS, or Dojo</strong>. It will make your life MUCH easier :-)
 					</p>
 
 					<aside class="notes">
@@ -195,7 +195,32 @@
 					</ul>
 				</section>
 				<section>
-					<h2>Example</h2>
+					<!-- Cover the basics of back-end cookie based authentication -->				
+					<h2>Authentication flow</h2>	
+					<img src="images/WLAuthFlow.png"/>
+				</section>
+				<section>
+					<!-- Cover the basics of back-end cookie based authentication -->				
+					<h2>Example - Set up</h2>	
+					<ul>
+						<li>Create a challenge handler in your code. This will need to issue a username/password, or some other authentication toekn</li>
+						<li>Set up a realm and security test in authenticationConfig.xml. In this security test, state you want to use adapter functions to authenticate the user</li>
+					</ul>
+					<pre><code data-trim style="width:110%">
+<customSecurityTest name="MySecurityTest">
+<test isInternalUserID="true" realm="MySecureRealm" step="1" />
+</customSecurityTest>	
+...			
+<realm loginModule="StrongDummy" name="MySecureRealm">
+<className>com.worklight.integration.auth.AdapterAuthenticator</className>
+<parameter name="login-function" value="AuthenticationAdapter.onAuthRequired"/>
+<parameter name="logout-function" value="AuthenticationAdapter.onLogout"/>
+</realm>
+					</code></pre>
+				</section>
+				
+				<section>
+					<h2>Example - Securing a function</h2>
 					<ul>
 						<li>In your adapter's XML file, add a security test to a function</li>
 					</ul>
@@ -205,16 +230,13 @@
 					</code></pre>
 
 					<ul>
-							<li>This will trigger a security test for a realm you've defined in authenticationConfig.xml</li>
+							<li>This will trigger the security test against the realm you've defined in authenticationConfig.xml</li>
 					</ul>
-					<pre><code data-trim style="width:110%">
-<customSecurityTest name="MySecurityTest">
-<test isInternalUserID="true" realm="MySecureRealm" step="1" />
-</customSecurityTest>
-					</code></pre>
+
 					<ul>
 						<li>This in turn will issue a challenge for "MySecureRealm" if there is no user logged in for that realm</li>
 						<li>At this point, your client code can handle the challenge, by providing authentication details, tokens, or similar</li>
+						<li>After authenticating, Worklight can re-issue the original request and return a result from the back end service</li>
 					</ul>
 					<aside class="notes">
 						<ul>
