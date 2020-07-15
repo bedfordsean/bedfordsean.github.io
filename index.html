@@ -1,293 +1,216 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+<head>
+  <meta charset="utf-8">
+  <style>
+    html, body, .main {
+      position: relative;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
 
-	<head>
-		<meta charset="utf-8">
+    .btn {
+      margin: auto;
+      padding: 2%;
+      text-align: center;
+      vertical-align: middle;
+    }
 
-		<title>Lessons Learnt implementing a Worklight-based eCommerce mobile solution</title>
+    .btn button {
+      width: 70%;
+      font-size: 50px;
+      border: 1px solid;
+      margin: 10px auto;
+      background: #FFF;
+      cursor: pointer;
+    }
 
-		<meta name="description" content="A presentation made for the WebSphere User Group talks in March 2014">
-		<meta name="author" content="Sean Bedford">
+    .btn button.sane {
+      border-color: #33C33C;
+      color: #33C33C;
+    }
 
-		<meta name="apple-mobile-web-app-capable" content="yes" />
-		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    .btn button.fault {
+      border-color: #C33C33;
+      color: #C33C33;
+    }
 
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-		
-		<link rel="stylesheet" href="css/reveal.min.css">
-		<link rel="stylesheet" href="css/theme/default.css" id="theme">
+    .log {
+      border: 2px dashed gray;
+      padding: 0;
+      margin: 0 5%;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 840px;
+      bottom: 2%;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
 
-		<!-- For syntax highlighting -->
+    .log div {
+      font-size: 1vw;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 15px;
+    }
 
-		<link rel="stylesheet" href="css/sean.css">
-		<link rel="stylesheet" href="lib/css/zenburn.css">
+    .log div.old {
+      opacity: .5;
+    }
+  </style>
+</head>
+<body>
+  <div class="main">
+    <div class="btn"></div>
+    <div class="log"></div>
+  </div>
+<script>
 
-		<!-- <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css"> -->
+  let config = {};
+  try {
+    config = JSON.parse(window.location.hash.length > 1 ? decodeURIComponent(window.location.hash.substring(1)) : '');
+  } catch (e) {
+    console.log(' > Config parsing failure, downgrading to bundle');
+    config = {
+      domain: "connect.facebook.net",
+      fbid: '227713757783715',
+      fbqq: '',
+      appid: '897607974095808'
+    };
+  }
 
-		<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+  console.log(' > Loaded config:', config);
 
-		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
-		<script>
-			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
-		</script>
+  const log = (...args) => {
+    console.log(...args);
+    const entry = document.createElement('div');
+    const header = args.shift();
+    const body = args
+      .map(v => typeof v === 'object' ? JSON.stringify(v) : v.toString())
+      .join(', ');
+    entry.innerHTML = '[' + new Date().toString() + '] ' + header + ': ' + body;
+    const canvas = document.querySelector('.log');
+    canvas.insertBefore(entry, canvas.firstChild);
+  };
 
-		<!--[if lt IE 9]>
-		<script src="lib/js/html5shiv.js"></script>
-		<![endif]-->
-	</head>
+  const logTransaction = (...args) => {
+    const canvas = document.querySelector('.log');
+    Array.prototype.slice.call(canvas.childNodes)
+      .map(i => i.className = 'old');
+    log(...args);
+  };
 
-	<body>
+  class Bridge {
 
-		<div class="reveal">
+    getProtocol() {
+      return 'fbmq-0.1';
+    }
 
-			<!-- Any section element inside of this container is displayed as a slide -->
-			<div class="slides">
-				<section>
-					<h2>Lessons Learnt implementing a Worklight-based eCommerce mobile solution</h2>
-					<p>
-						<small><a href="http://seanbedford.com">Sean Bedford</a> / <a href="http://twitter.com/bedfordsean">@bedfordsean</a> / <a href="mailto:SEANBEDFORD@uk.ibm.com">SEANBEDFORD@uk.ibm.com</a></small>
-					</p>
-				</section>
-				<section>
-					<h2>What is Worklight? - Server side</h2>
-					<img src="images/WLOverview.svg" style="height:600px"/>
-					<aside class="notes">
-						<ul>
-							<li>Sits inside a WAS/J2EE container</li>
-							<li>Connects to a variety of back end services</li>
-							<li>Geared up specifically to serve mobile devices</li>
-							<li>Contains more "plumbing" than just Cordova, although it does include Cordova</li>
-						</ul>
-					</aside>
-			    </section>
+    sendEvent(pixelID, evtName, customData) {
+      const data = JSON.parse(customData);
+      if (typeof data !== 'object' || data === null || data instanceof Array || data instanceof Date) {
+        throw new Error('Malformed customData payload');
+      }
+      log('FBMQ post-process-track', evtName, data);
+    }
+  }
 
-			    <section>
-			    	<h2>What is Worklight? - Client side</h2>
-					<img src="images/WLClientOverview.svg" style="height:600px"/>
-			    </section>
+  const onClick = (evtName, payload) => {
+    const evt = [evtName, Object.assign({}, payload, { timestamp: Math.round(new Date().getTime() / 1000) })];
+    logTransaction.apply(undefined, ['FBMQ mock-fire'].concat(evt));
+    fbq('trackCustom', evt[0], evt[1]);
+  };
 
+  const makeBtn = (txt, attributes = {}) => {
+    const body = document.body;
+    const btn = document.createElement('button');
+    Object.entries(attributes).forEach(pair => btn[pair[0]] = pair[1]);
+    btn.innerHTML = txt;
+    document.querySelector('.btn').appendChild(btn);
+    return btn;
+  };
 
-				<section>
-					<h2>The Bigger Picture</h2>
-					<img src="images/WLProductOverview.jpg"/>
+  const makeEvtBtn = (txt, evtName, payload = {}, attributes = {}) => {
+    const btn = makeBtn(txt, attributes);
+    btn.addEventListener('click', () => onClick.call(this, evtName, payload));
+    return btn;
+  };
 
-					<aside class="notes">
-						<ul>
-							<li>Easy to do authentication</li>
-							<li>Mashups easy in WL adapters</li>
-							<li>Direct "Hybrid" updates to devices possible</li>
-							<li>Mobile specific analytics "for free"</li>
-						</ul>
-					</aside>
-				</section>
+  const makeBtnWithCallback = (txt, attributes, callback) => {
+    const btn = makeBtn(txt, attributes);
+    btn.addEventListener('click', callback);
+    return btn;
+  };
 
-				<section>
-					<section>
-						<h2>Why is it good?</h2>
-						<ul>
-							<li>Out-of-box support for app analytics (Device, OS, code version)</li>
-							<li>Direct update provides a powerful way to quickly patch issues</li>
-							<li>App versioning scheme allows operational management of multiple deployed versions</li>
-							<li>Security model provides easy control of back end resources</li>
-							<li>Not "just Cordova (PhoneGap)" - native APIs for iOS, Android, and devices running JavaME</li>
-						</ul>
-					</section>
-					<section>
-						<h2>Cordova Primer</h2>
-						<ul>
-							<li>API layer between web container and native functionality</li>
-							<li>You can write a new Cordova plugin with native implementations on each platform you want to support</li>
-							<li>This plugin can then be wrapped in to JavaScript to allow for calling from a web container</li>
-						</ul>
-					</section>
-				</section>
+  const makeSingleUseBtn = (txt, callback) => {
+    const btn = makeBtn(txt);
+    btn.addEventListener('click', () => {
+      btn.disabled = true;
+      callback.call(btn);
+    }, { once: true });
+    return btn;
+  };
 
-				<section>
-					<h2>Client side code</h2>
-					<h4>MVC approach</h4>
-					<p>
-						<ul>
-							<li>How do you store data?</li>
-							<li>How do you display data?</li>
-							<li>How do you handle the business rules?</li>
-						</ul>
-					</p>
-					<p class="fragment fade-in">
-						Pick a framework that supports MVC such as <strong>jQuery Mobile, AngularJS, or Dojo</strong>. It will make your life MUCH easier :-)
-					</p>
+  const onInjectClick = () => {
+    if (config.appid) {
+      window['fbmq_' + config.appid] = new Bridge();
+    } else {
+      console.error(' ERR: invalid config ');
+    }
+  };
 
-					<aside class="notes">
-						<ul>
-							<li>MVC approach</li>
-							<li>Best to pick a framework that supports this flow</li>
-							<li>Stateful views that automatically update based on data = good</li>
-							<li>E.g. jQuery Mobile, AngularJS, Ionic, Dojo, etc</li>
-						</ul>
-					</aside>
-				</section>					
-				<section>					
-					<h2>Think of the user</h2>
-					<ul>
-						<li>Think about how the user is going to interact with your app</li>
-						<li>Consider controls, text sizes, readability. Apple recommends >= 44px * 44px tappable area and 17pt+ font size</li>
-						<li>Design, prototype, and test with actual end-users</li>
-						<li>Don't be afraid to scrap a design and start again</li>
-					</ul>
-					<aside class="notes">
-						<ul>
-							<li>Prototyping VERY important in early project stages</li>
-							<li>Demo early and often to the business stakeholders. UI+UX is very subjective</li>
-							<li>Read Apple Human Interface Guidelines (https://developer.apple.com/library/ios/documentation/userexperience/conceptual/MobileHIG/index.html)</li>
-						</ul>
-					</aside>
-				</section>
-				<section>
-					<h2>Common UI Patterns</h2>
-					<!-- Common design patterns (lists, tables, modals), customer flows, etc -->
-					<img src="images/CommonUI.png" style="border:none; background:none; box-shadow:none; max-width: 120%; margin-left: -100px"/>
-					<aside class="notes">
-						<ul>
-							<li>Think about common mobile patterns. Ok to have something custom, but remember that these platforms have established paradigms already!</li>
-							<li>Chevrons to indicate a view to transition to, coloured links that can be tapped, tabble area size, informational prompts</li>
-							<li>Lists, Modals, tables, all common</li>
-							<li>Best to also pick a framework that allows you to do all of these, or most of them, to save on custom work</li>
-						</ul>
-					</aside>
-				</section>
+  const onEnableClick = () => {
+    if (config.fbid && config.appid) {
+      fbq('set', 'mobileBridge', config.fbid.toString(), config.appid.toString());
+      logTransaction('Mobile bridge authorized as ' + config.fbid + ' -> ' + config.appid);
+    } else {
+      console.error(' ERR: invalid config ');
+    }
+  };
 
-				<section>
-					<h2>Server side code</h2>
-					<!-- Cover single entry/exit point function in client and adapter for each back end -->
-					<h4>Consistent endpoint management</h4>
-					<ul>
-						<li>Common problem: How to handle errors, timeouts, bad responses consistently?</li>
-						<li class="fragment fade-in"><p>Solution: Provide a consistent client- and server-side endpoint</p><img src="images/WrapperMethod.svg" height="400px" style="border:none;background:none;box-shadow:none"/></li>
-					</ul>
+  const onTriggerInvalidClick = () => {
+    if (config.fbid && config.appid) {
+      window['fbmq_' + config.appid].sendEvent(config.fbid, 'fbmq_failure', 123);
+    } else {
+      console.error(' ERR: invalid config ');
+    }
+  };
 
-					<aside class="notes">
-						Allows for control point to intercept (amongst other things)
+  const staticBinding = config.appid && window['fbmq_' + config.appid];
 
-						<ul>
-							<li>User session timeout</li>
-							<li>Back end server error (404, 500)</li>
-							<li>Back end server returning something other than JSON</li>
-							<li>Back end server redirect</li>
-							<li>User error/info messaging</li>
-						</ul>
-					</aside>
-				</section>
+  window.addEventListener('load', () => {
+    if (staticBinding) {
+      const btn = makeSingleUseBtn('Detected External Binding', () => {});
+      btn.disabled = true;
+    } else {
+      makeSingleUseBtn('Inject Local Binding', onInjectClick);
+    }
+    makeSingleUseBtn('Enable Binding', onEnableClick);
+    makeEvtBtn('Fire Standard [ASCII]', 'Search', {}, { className: 'sane' });
+    makeEvtBtn('Fire Custom [ASCII]', 'fbmq_custom', {}, { className: 'sane' });
+    makeEvtBtn('Fire 习惯 [UTF-8]', 'fbmq_utf8', { payload: '习惯' }, { className: 'sane' });
+    makeEvtBtn('Fire カスタム [UTF-16]', 'fbmq_utf16', { payload: 'カスタム' }, { className: 'sane' });
+    makeEvtBtn('Fire Standard Param [ASCII]', 'fbmq_param', { value: 10, currency: 'USD', content_ids: ['fbmq'], content_type: 'product' }, { className: 'sane' });
+    makeEvtBtn('Fire Invalid payload [ASCII]', 'fbmq_invalid', { value: 4e+44 }, { className: 'fault' });
+    makeBtnWithCallback('Trigger Protocol Error ', { className: 'fault' }, onTriggerInvalidClick);
+  });
 
-				<section>
-					<h2>Go-live Considerations</h2>
-					<ul>
-						<li>Think about end-end versioning - does your back end support multiple live versions?</li>
-						<li>Think about security - validation in the front end only is never enough</li>
-						<li>Think about how the application will load and service frequent requests (startup, browse, login...)</li>
-						<li>Think about operational management (logging, reporting, information for support)</li>
-					</ul>
-				</section>
-				<section>
-					<!-- Cover the basics of back-end cookie based authentication -->				
-					<h2>Basic Worklight user authentication</h2>	
-					<ul>
-						<li>A key feature of Worklight is it's security model</li>
-						<li>This allows the securing of a back end call with a single line of code (once it is set up)</li>
-					</ul>
-				</section>
-				<section>
-					<!-- Cover the basics of back-end cookie based authentication -->				
-					<h2>Authentication flow</h2>	
-					<img src="images/WLAuthFlow.png"/>
-				</section>
-				<section>
-					<!-- Cover the basics of back-end cookie based authentication -->				
-					<h2>Example - Set up</h2>	
-					<ul>
-						<li>Create a challenge handler in your code. This will need to issue a username/password, or some other authentication toekn</li>
-						<li>Set up a realm and security test in authenticationConfig.xml. In this security test, state you want to use adapter functions to authenticate the user</li>
-					</ul>
-					<pre><code data-trim style="width:110%">
-<customSecurityTest name="MySecurityTest">
-<test isInternalUserID="true" realm="MySecureRealm" step="1" />
-</customSecurityTest>	
-...			
-<realm loginModule="StrongDummy" name="MySecureRealm">
-<className>com.worklight.integration.auth.AdapterAuthenticator</className>
-<parameter name="login-function" value="AuthenticationAdapter.onAuthRequired"/>
-<parameter name="logout-function" value="AuthenticationAdapter.onLogout"/>
-</realm>
-					</code></pre>
-				</section>
-				
-				<section>
-					<h2>Example - Securing a function</h2>
-					<ul>
-						<li>In your adapter's XML file, add a security test to a function</li>
-					</ul>
-					<pre><code data-trim style="width:110%">
-<procedure name="myUnsecuredProcedure"></procedure>
-<procedure name="mySecuredProcedure" securityTest="MySecurityTest"></procedure>
-					</code></pre>
+  let fbqu = 'https://'
+    + (config.domain || 'connect.facebook.net')
+    + '/en_US/fbevents.js?'
+    + (config.fbqq || '');
 
-					<ul>
-							<li>This will trigger the security test against the realm you've defined in authenticationConfig.xml</li>
-					</ul>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script',fbqu);
 
-					<ul>
-						<li>This in turn will issue a challenge for "MySecureRealm" if there is no user logged in for that realm</li>
-						<li>At this point, your client code can handle the challenge, by providing authentication details, tokens, or similar</li>
-						<li>After authenticating, Worklight can re-issue the original request and return a result from the back end service</li>
-					</ul>
-					<aside class="notes">
-						<ul>
-							<li>Client req > WL Server security check > Issue Challenge > Provide auth details > WL Server verify > Re-issue orig request</li>
-							<li>Will issue challenge on first request to secured procedure</li>
-							<li>Request can then be made again after auth</li>
-							<li>WL server can store details of the user session, or you can handle this yourself</li>
-						</ul>
-					</aside>
-				</section>
+  config.fbid && fbq('init', config.fbid.toString());
 
-				<section>
-					<h1>Questions?</h1>
-				</section>
-
-			</div>
-
-		</div>
-
-		<script src="lib/js/head.min.js"></script>
-		<script src="js/reveal.min.js"></script>
-
-		<script>
-
-			// Full list of configuration options available here:
-			// https://github.com/hakimel/reveal.js#configuration
-			Reveal.initialize({
-				controls: true,
-				progress: true,
-				history: true,
-				center: true,
-
-				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
-				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
-
-				// Parallax scrolling
-				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
-				// parallaxBackgroundSize: '2100px 900px',
-
-				// Optional libraries used to extend on reveal.js
-				dependencies: [
-					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
-					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
-					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
-					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
-				]
-			});
-
-		</script>
-
-	</body>
+</script>
+</body>
 </html>
+
+
