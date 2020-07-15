@@ -67,21 +67,6 @@
   </div>
 <script>
 
-  let config = {};
-  try {
-    config = JSON.parse(window.location.hash.length > 1 ? decodeURIComponent(window.location.hash.substring(1)) : '');
-  } catch (e) {
-    console.log(' > Config parsing failure, downgrading to bundle');
-    config = {
-      domain: "connect.facebook.net",
-      fbid: '227713757783715',
-      fbqq: '',
-      appid: '897607974095808'
-    };
-  }
-
-  console.log(' > Loaded config:', config);
-
   const log = (...args) => {
     console.log(...args);
     const entry = document.createElement('div');
@@ -152,65 +137,23 @@
     return btn;
   };
 
-  const onInjectClick = () => {
-    if (config.appid) {
-      window['fbmq_' + config.appid] = new Bridge();
-    } else {
-      console.error(' ERR: invalid config ');
-    }
-  };
-
-  const onEnableClick = () => {
-    if (config.fbid && config.appid) {
-      fbq('set', 'mobileBridge', config.fbid.toString(), config.appid.toString());
-      logTransaction('Mobile bridge authorized as ' + config.fbid + ' -> ' + config.appid);
-    } else {
-      console.error(' ERR: invalid config ');
-    }
-  };
-
-  const onTriggerInvalidClick = () => {
-    if (config.fbid && config.appid) {
-      window['fbmq_' + config.appid].sendEvent(config.fbid, 'fbmq_failure', 123);
-    } else {
-      console.error(' ERR: invalid config ');
-    }
-  };
-
-  const staticBinding = config.appid && window['fbmq_' + config.appid];
-
   window.addEventListener('load', () => {
-    if (staticBinding) {
-      const btn = makeSingleUseBtn('Detected External Binding', () => {});
-      btn.disabled = true;
-    } else {
-      makeSingleUseBtn('Inject Local Binding', onInjectClick);
-    }
-    makeSingleUseBtn('Enable Binding', onEnableClick);
-    makeEvtBtn('Fire Standard [ASCII]', 'Search', {}, { className: 'sane' });
-    makeEvtBtn('Fire Custom [ASCII]', 'fbmq_custom', {}, { className: 'sane' });
-    makeEvtBtn('Fire 习惯 [UTF-8]', 'fbmq_utf8', { payload: '习惯' }, { className: 'sane' });
-    makeEvtBtn('Fire カスタム [UTF-16]', 'fbmq_utf16', { payload: 'カスタム' }, { className: 'sane' });
-    makeEvtBtn('Fire Standard Param [ASCII]', 'fbmq_param', { value: 10, currency: 'USD', content_ids: ['fbmq'], content_type: 'product' }, { className: 'sane' });
-    makeEvtBtn('Fire Invalid payload [ASCII]', 'fbmq_invalid', { value: 4e+44 }, { className: 'fault' });
-    makeBtnWithCallback('Trigger Protocol Error ', { className: 'fault' }, onTriggerInvalidClick);
+    makeEvtBtn('Fire Purchase Event', 'Purchase', { value: 10, currency: 'USD', content_ids: ['fbmq'], content_type: 'product' }, { className: 'sane' });
   });
 
-  let fbqu = 'https://'
-    + (config.domain || 'connect.facebook.net')
-    + '/en_US/fbevents.js?'
-    + (config.fbqq || '');
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '101369170508576');
+  fbq('track', 'PageView');
 
-  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-  document,'script',fbqu);
-
-  config.fbid && fbq('init', config.fbid.toString());
+  fbq('set', 'mobileBridge', '101369170508576', '897607974095808');
 
 </script>
 </body>
 </html>
-
-
